@@ -26,7 +26,7 @@ contract('properties', (accounts) => {
     const storage = await PropertyStorage.deployed();
 
     try {
-      await storage.publishProperty(5);
+      await storage.publishProperty(accounts[0], 5);
       assert.fail();
     } catch (err) {
       assertVMException(err);

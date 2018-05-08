@@ -18,6 +18,6 @@ contract PropertyController is BaseController, PropertyOwner {
 
         require(_zfbToken.balanceOf(msg.sender) >= deposit, 'not sufficient funds');
         _zfbToken.transferFrom(msg.sender, _propertyStorageAddress, deposit);
-        _propertyStorage.publishProperty(deposit);
+        _propertyStorage.publishProperty(msg.sender, deposit);
     }
 }

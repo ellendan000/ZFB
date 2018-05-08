@@ -29,9 +29,9 @@ contract PropertyStorage is BaseStorage {
 
     uint latestPropertyId = 0;
 
-    function publishProperty(uint _deposit) public onlyController returns (uint){
+    function publishProperty(address _owner, uint _deposit) public onlyController returns (uint){
         latestPropertyId = latestPropertyId.add(1);
-        properties.push(Property(latestPropertyId, _deposit, msg.sender, State.Idle));
+        properties.push(Property(latestPropertyId, _deposit, _owner, State.Idle));
         ownerToProperties[msg.sender].push(latestPropertyId);
         return latestPropertyId;
     }

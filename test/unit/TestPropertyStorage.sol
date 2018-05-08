@@ -13,7 +13,7 @@ contract TestPropertyStorage {
 
     function testPublishProperty() public {
         uint _expectedId = 1;
-        Assert.equal(propertyStorage.publishProperty(5), _expectedId, "Should publish property with ID 1");
+        Assert.equal(propertyStorage.publishProperty(this, 5), _expectedId, "Should publish property with ID 1");
     }
 
     function testRent() public {
