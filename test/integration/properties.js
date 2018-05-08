@@ -26,7 +26,7 @@ contract('properties', (accounts) => {
     const storage = await PropertyStorage.deployed();
 
     try {
-      await storage.publishProperty();
+      await storage.publishProperty(5);
       assert.fail();
     } catch (err) {
       assertVMException(err);
@@ -46,20 +46,15 @@ contract('properties', (accounts) => {
 
     assert.isOk(tx);
 
-    const storage = await PropertyStorage.deployed();
-    const ownPropertyIds = await storage.ownerToProperties.getData();
-    console.log(ownPropertyIds);
-    // assert.equal(ownPropertyIds[0], 1);
-    // assert.equal(storage.idToProperty[])
-    // const propertyStorageBalance = await token.balanceOf.call(PropertyStorage.address);
-    // assert.equal(propertyStorageBalance.toString(), "5");
+    const propertyStorageBalance = await token.balanceOf.call(PropertyStorage.address);
+    assert.equal(propertyStorageBalance.toString(), "5");
   });
 
   it("can't publish property with controller when has no ZFB", async () => {
     const controller = await PropertyController.deployed();
 
     try {
-      const tx = await controller.publishProperty();
+      const tx = await controller.publishProperty.sendTransaction({from: accounts[2]});
       assert.fail();
     } catch (err) {
       assertVMException(err);

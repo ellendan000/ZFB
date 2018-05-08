@@ -6,6 +6,7 @@ import "../token/ZFBToken.sol";
 import "./PropertyStorage.sol";
 
 contract PropertyController is BaseController, PropertyOwner {
+
     function publishProperty() public {
         ContractManager _manager = ContractManager(managerAddress);
 
@@ -15,8 +16,8 @@ contract PropertyController is BaseController, PropertyOwner {
         address _propertyStorageAddress = _manager.getAddress("PropertyStorage");
         PropertyStorage _propertyStorage = PropertyStorage(_propertyStorageAddress);
 
-        require(_zfbToken.balanceOf(msg.sender) >= 5, 'balance is not enough');
+        require(_zfbToken.balanceOf(msg.sender) >= deposit, 'not sufficient funds');
         _propertyStorage.publishProperty(deposit);
-//        _zfbToken.transfer(_propertyStorageAddress, deposit);
+        _zfbToken.transfer(_propertyStorageAddress, deposit);
     }
 }

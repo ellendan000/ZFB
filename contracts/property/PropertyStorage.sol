@@ -17,7 +17,7 @@ contract PropertyStorage is BaseStorage {
 
     struct Property {
         uint id;
-        uint8 depositOfOwner;
+        uint depositOfOwner;
         address owner;
         State state;
         //        bytes32 key;
@@ -29,7 +29,7 @@ contract PropertyStorage is BaseStorage {
 
     uint latestPropertyId = 0;
 
-    function publishProperty(uint8 _depositOfOwner) public onlyController returns (uint){
+    function publishProperty(uint _depositOfOwner) public onlyController returns (uint){
         latestPropertyId = latestPropertyId.add(1);
         properties.push(Property(latestPropertyId, _depositOfOwner, msg.sender, State.Idle));
         ownerToProperties[msg.sender].push(latestPropertyId);
@@ -42,10 +42,6 @@ contract PropertyStorage is BaseStorage {
         uint8 _rental) public returns (uint){
         idToRents[_propertyId].push(Rent(_startTime, _howLong, _rental, msg.sender));
         return idToRents[_propertyId].length - 1;
-    }
-
-    function getPropertyIds(address _owner) external returns (uint[]){
-        return ownerToProperties[_owner];
     }
 
 }
