@@ -41,6 +41,8 @@ contract('properties', (accounts) => {
     const userBalance = await token.balanceOf.call(_address);
     assert.equal(userBalance.toString(), "1000");
 
+    token.approve.sendTransaction(PropertyController.address, 5, {from: _address});
+
     const controller = await PropertyController.deployed();
     const tx = await controller.publishProperty.sendTransaction({from: _address});
 

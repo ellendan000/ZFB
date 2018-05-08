@@ -1,7 +1,7 @@
 pragma solidity ^0.4.21;
 
-import "truffle/Assert.sol";
-import "../../contracts/property/PropertyStorage.sol";
+import 'truffle/Assert.sol';
+import '../../contracts/property/PropertyStorage.sol';
 
 contract TestPropertyStorage {
     PropertyStorage propertyStorage;
@@ -23,7 +23,7 @@ contract TestPropertyStorage {
         uint8 _rental = 15;
 
         Assert.equal(propertyStorage.rent(_givenPropertyId, _givenStartTime, _givenHowLong, _rental),
-            0, "Should rent property with rent serial 0");
+            0, 'Should rent property with rent serial 0');
     }
 
 }
