@@ -1,6 +1,6 @@
 const web3 = require('web3');
 const {
-  utils: {toWei},
+    utils: {toWei},
 } = web3;
 
 const PropertyStorage = artifacts.require('PropertyStorage');
@@ -11,57 +11,92 @@ const utils = require('../utils');
 const {assertVMException} = utils;
 
 const getFund = async (_address) => {
-  const ico = await ZFBTokenICO.deployed();
+    const ico = await ZFBTokenICO.deployed();
 
-  const wei = toWei('1', "ether");
-  await ico.sendTransaction({
-    from: _address,
-    value: wei,
-  });
+    const wei = toWei('1', 'ether');
+    await ico.sendTransaction({
+        from: _address,
+        value: wei,
+    });
 };
 
-contract('properties', (accounts) => {
+const getEvent = (result, eventName) => {
+    for(let i=0; i< result.logs.length; i++) {
+        const log = result.logs[i];
 
-  it("can't publish property without controller", async () => {
-    const storage = await PropertyStorage.deployed();
-
-    try {
-      await storage.publishProperty(accounts[0], 5);
-      assert.fail();
-    } catch (err) {
-      assertVMException(err);
+        if (log.event === eventName) {
+            return log;
+        }
     }
-  });
+};
 
-  it("can publish property with controller when has enough ZFB", async () => {
-    const _address = accounts[1];
-    getFund(_address);
+contract('properties', async (accounts) => {
+    let storage, token, controller;
 
-    const token = await ZFBToken.deployed();
-    const userBalance = await token.balanceOf.call(_address);
-    assert.equal(userBalance.toString(), "1000");
+    before(async () => {
+        storage = await PropertyStorage.deployed();
+        token = await ZFBToken.deployed();
+        controller = await PropertyController.deployed();
+    });
 
-    token.approve.sendTransaction(PropertyController.address, 5, {from: _address});
+    it("can't publish property without controller", async () => {
+        try {
+            await storage.publishProperty(accounts[1], 5);
+            assert.fail();
+        } catch (err) {
+            assertVMException(err);
+        }
+    });
 
-    const controller = await PropertyController.deployed();
-    const tx = await controller.publishProperty.sendTransaction({from: _address});
+    it("can publish property with controller when has enough ZFB", async () => {
+        const _address = accounts[1];
+        await getFund(_address);
 
-    assert.isOk(tx);
+        const userBalance = await token.balanceOf.call(_address);
+        assert.equal(userBalance.toString(), '1000');
 
-    const propertyStorageBalance = await token.balanceOf.call(PropertyStorage.address);
-    assert.equal(propertyStorageBalance.toString(), "5");
-  });
+        token.approve.sendTransaction(PropertyController.address, 5, {from: _address});
 
-  it("can't publish property with controller when has no ZFB", async () => {
-    const controller = await PropertyController.deployed();
+        const tx = await controller.publishProperty.sendTransaction({from: _address});
+        assert.isOk(tx);
 
-    try {
-      const tx = await controller.publishProperty.sendTransaction({from: accounts[2]});
-      assert.fail();
-    } catch (err) {
-      assertVMException(err);
-    }
-  });
+        const propertyStorageBalance = await token.balanceOf.call(PropertyStorage.address);
+        assert.equal(propertyStorageBalance.toString(), '5');
+    });
 
+    it("can't publish property with controller when has no ZFB", async () => {
+        try {
+            const tx = await controller.publishProperty.sendTransaction({from: accounts[2]});
+            assert.fail();
+        } catch (err) {
+            assertVMException(err);
+        }
+    });
+
+    it("can submit rent for property with controller when has enough ZFB", async () => {
+        const _ownerAddress = accounts[1];
+        await getFund(_ownerAddress);
+
+        const _rentAddress = accounts[3];
+        await getFund(_rentAddress);
+
+        const storageBalance = await token.balanceOf.call(storage.address);
+        token.approve.sendTransaction(PropertyController.address, 5, {from: _ownerAddress});
+        token.approve.sendTransaction(PropertyController.address, 15, {from: _rentAddress});
+
+        await controller.publishProperty({from: _ownerAddress}).then(async (result) => {
+            let event = getEvent(result, 'PropertyPublished');
+            const propertyId = event.args.id.toNumber();
+
+            const tx = await controller.submitRent.sendTransaction(propertyId, new Date().getTime(), 15, 15, {from: _rentAddress});
+            assert.isOk(tx);
+
+            const propertyStorageBalance = await token.balanceOf.call(_rentAddress);
+            assert.equal(propertyStorageBalance.toString(), '985');
+
+            const currentStorageBalance = await token.balanceOf.call(storage.address);
+            assert.equal(currentStorageBalance.sub(storageBalance).toString(), '20');
+        });
+    });
 
 });

@@ -13,16 +13,21 @@ contract TestPropertyStorage {
 
     function testPublishProperty() public {
         uint _expectedId = 1;
-        Assert.equal(propertyStorage.publishProperty(this, 5), _expectedId, "Should publish property with ID 1");
+
+        uint _propertyId;
+        address _owner;
+        (_propertyId, _owner) = propertyStorage.publishProperty(this, 5);
+        Assert.equal(_propertyId, _expectedId, "Should publish property with ID 1");
+        Assert.equal(_owner, this, "Should publish property with current address");
     }
 
     function testRent() public {
         uint _givenPropertyId = 1;
         uint _givenStartTime = now;
-        uint8 _givenHowLong = 15;
-        uint8 _rental = 15;
+        uint _givenHowLong = 15;
+        uint _rental = 15;
 
-        Assert.equal(propertyStorage.rent(_givenPropertyId, _givenStartTime, _givenHowLong, _rental),
+        Assert.equal(propertyStorage.submitRent(this, _givenPropertyId, _givenStartTime, _givenHowLong, _rental),
             0, 'Should rent property with rent serial 0');
     }
 
