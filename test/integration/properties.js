@@ -88,14 +88,17 @@ contract('properties', async (accounts) => {
             let event = getEvent(result, 'PropertyPublished');
             const propertyId = event.args.id.toNumber();
 
-            const tx = await controller.submitRent.sendTransaction(propertyId, new Date().getTime(), 15, 15, {from: _rentAddress});
-            assert.isOk(tx);
+            const tx1 = await controller.submitRent.sendTransaction(propertyId, new Date().getTime(), 15, 15, {from: _rentAddress});
+            assert.isOk(tx1);
 
             const propertyStorageBalance = await token.balanceOf.call(_rentAddress);
             assert.equal(propertyStorageBalance.toString(), '985');
 
             const currentStorageBalance = await token.balanceOf.call(storage.address);
             assert.equal(currentStorageBalance.sub(storageBalance).toString(), '20');
+
+            const tx2 = await controller.agreeRent(propertyId, {from: _ownerAddress});
+            assert.isOk(tx2);
         });
     });
 
