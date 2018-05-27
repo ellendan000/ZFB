@@ -16,12 +16,12 @@ contract TestPropertyStorage {
 
         uint _propertyId;
         address _owner;
-        (_propertyId, _owner) = propertyStorage.publishProperty(this, 5);
+        (_propertyId, _owner) = propertyStorage.publishProperty(this, '一室一厅', 5);
         Assert.equal(_propertyId, _expectedId, "Should publish property with ID 1");
         Assert.equal(_owner, this, "Should publish property with current address");
     }
 
-    function testRent() public {
+    function testSubmitRent() public {
         uint _givenPropertyId = 1;
         uint _givenStartTime = now;
         uint _givenHowLong = 15;

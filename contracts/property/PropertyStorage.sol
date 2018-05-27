@@ -22,6 +22,7 @@ contract PropertyStorage is BaseStorage {
     struct Property {
         uint id;
         uint deposit;
+        string title;
         address owner;
         State state;
         //        bytes32 key;
@@ -33,9 +34,9 @@ contract PropertyStorage is BaseStorage {
 
     uint latestPropertyId = 0;
 
-    function publishProperty(address _owner, uint _deposit) public onlyController returns (uint, address){
+    function publishProperty(address _owner, string title, uint _deposit) public onlyController returns (uint, address){
         latestPropertyId = latestPropertyId.add(1);
-        idToProperty[latestPropertyId] = Property(latestPropertyId, _deposit, _owner, State.Idle);
+        idToProperty[latestPropertyId] = Property(latestPropertyId, _deposit, title, _owner, State.Idle);
         return (latestPropertyId, _owner);
     }
 
@@ -83,35 +84,35 @@ contract PropertyStorage is BaseStorage {
         return result;
     }
 
-    function ownerRate(address _owner, uint _propertyId, uint8 _rate) public
-    onlyController
-    onlyPropertyOwner(_owner, _propertyId)
-    checkRate(_rate)
-    returns (uint) {
-        Rent[] memory rents = propertyIdToRents[_propertyId];
-        Rent storage rent = propertyIdToRents[_propertyId][rents.length - 1];
-
-        require(rent.ownerRate == 0);
-        rent.ownerRate == _rate;
-        return _rate;
-    }
-
-    function tenantRate(address _tenant, uint _propertyId, uint8 _rate) public
-    onlyController
-    onlyTenant(_tenant, _propertyId)
-    checkRate(_rate)
-    returns (uint) {
-        Rent storage rent;
-        for (uint i = propertyIdToRents[_propertyId].length - 1; i >= 0; i--) {
-            if (propertyIdToRents[_propertyId][i].tenant == _tenant) {
-                propertyIdToRents[_propertyId][i];
-            }
-        }
-
-        require(rent.tenantRate == 0);
-        rent.tenantRate == _rate;
-        return _rate;
-    }
+//    function ownerRate(address _owner, uint _propertyId, uint8 _rate) public
+//    onlyController
+//    onlyPropertyOwner(_owner, _propertyId)
+//    checkRate(_rate)
+//    returns (uint) {
+//        Rent[] memory rents = propertyIdToRents[_propertyId];
+//        Rent storage rent = propertyIdToRents[_propertyId][rents.length - 1];
+//
+//        require(rent.ownerRate == 0);
+//        rent.ownerRate == _rate;
+//        return _rate;
+//    }
+//
+//    function tenantRate(address _tenant, uint _propertyId, uint8 _rate) public
+//    onlyController
+//    onlyTenant(_tenant, _propertyId)
+//    checkRate(_rate)
+//    returns (uint) {
+//        Rent storage rent;
+//        for (uint i = propertyIdToRents[_propertyId].length - 1; i >= 0; i--) {
+//            if (propertyIdToRents[_propertyId][i].tenant == _tenant) {
+//                rent = propertyIdToRents[_propertyId][i];
+//            }
+//        }
+//
+//        require(rent.tenantRate == 0);
+//        rent.tenantRate == _rate;
+//        return _rate;
+//    }
 
     modifier onlyPropertyOwner(address _owner, uint _propertyId) {
         require(idToProperty[_propertyId].owner == _owner);

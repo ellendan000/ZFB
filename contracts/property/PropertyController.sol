@@ -8,25 +8,17 @@ import "./PropertyStorage.sol";
 
 contract PropertyController is BaseController, PropertyOwner, RateReward {
     event PropertyPublished(uint id, address owner);
-    ZFBToken _zfbToken;
-    PropertyStorage _propertyStorage;
 
-    constructor(){
-        loadReferenceContracts();
-    }
+    function publishProperty(string title) public {
+        ZFBToken _zfbToken = getZFBToken();
+        PropertyStorage _propertyStorage = getPropertyStorage();
 
-    function loadReferenceContracts() public onlyOwner {
-        _zfbToken = getZFBToken();
-        _propertyStorage = getPropertyStorage();
-    }
-
-    function publishProperty() public {
         require(_zfbToken.balanceOf(msg.sender) >= deposit, 'not sufficient funds');
         _zfbToken.transferFrom(msg.sender, address(_propertyStorage), deposit);
 
         uint _propertyId;
         address _owner;
-        (_propertyId, _owner) = _propertyStorage.publishProperty(msg.sender, deposit);
+        (_propertyId, _owner) = _propertyStorage.publishProperty(msg.sender, title, deposit);
         emit PropertyPublished(_propertyId, _owner);
     }
 
@@ -34,31 +26,44 @@ contract PropertyController is BaseController, PropertyOwner, RateReward {
         uint _startTime,
         uint _howLong,
         uint _rental) public {
+        ZFBToken _zfbToken = getZFBToken();
+        PropertyStorage _propertyStorage = getPropertyStorage();
+
         require(_zfbToken.balanceOf(msg.sender) >= _rental, 'not sufficient funds');
         _zfbToken.transferFrom(msg.sender, address(_propertyStorage), _rental);
         _propertyStorage.submitRent(msg.sender, _propertyId, _startTime, _howLong, _rental);
     }
 
     function agreeRent(uint _propertyId) public {
+        PropertyStorage _propertyStorage = getPropertyStorage();
         _propertyStorage.agreeRent(msg.sender, _propertyId);
     }
 
     function getRental(uint _propertyId) public {
+        ZFBToken _zfbToken = getZFBToken();
+        PropertyStorage _propertyStorage = getPropertyStorage();
+
         _zfbToken.approve(
             msg.sender,
             _propertyStorage.calculateRental(msg.sender, _propertyId)
         );
     }
 
-    function ownerRate(uint _propertyId, uint8 _rate) public {
-        _propertyStorage.ownerRate(msg.sender, _propertyId, _rate);
-        _zfbToken.approve(msg.sender, rewardNum);
-    }
-
-    function tenantRate(uint _propertyId, uint8 _rate) public {
-        _propertyStorage.tenantRate(msg.sender, _propertyId, _rate);
-        _zfbToken.approve(msg.sender, rewardNum);
-    }
+//    function ownerRate(uint _propertyId, uint8 _rate) public {
+//        ZFBToken _zfbToken = getZFBToken();
+//        PropertyStorage _propertyStorage = getPropertyStorage();
+//
+//        _propertyStorage.ownerRate(msg.sender, _propertyId, _rate);
+//        _zfbToken.approve(msg.sender, rewardNum);
+//    }
+//
+//    function tenantRate(uint _propertyId, uint8 _rate) public {
+//        ZFBToken _zfbToken = getZFBToken();
+//        PropertyStorage _propertyStorage = getPropertyStorage();
+//
+//        _propertyStorage.tenantRate(msg.sender, _propertyId, _rate);
+//        _zfbToken.approve(msg.sender, rewardNum);
+//    }
 
     function getZFBToken() private returns (ZFBToken) {
         ContractManager _manager = ContractManager(managerAddress);
@@ -71,7 +76,5 @@ contract PropertyController is BaseController, PropertyOwner, RateReward {
         address _propertyStorageAddress = _manager.getAddress("PropertyStorage");
         return PropertyStorage(_propertyStorageAddress);
     }
-
-
 
 }

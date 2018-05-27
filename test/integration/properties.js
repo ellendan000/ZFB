@@ -41,7 +41,7 @@ contract('properties', async (accounts) => {
 
     it("can't publish property without controller", async () => {
         try {
-            await storage.publishProperty(accounts[1], 5);
+            await storage.publishProperty(accounts[1], '一室一厅', 5);
             assert.fail();
         } catch (err) {
             assertVMException(err);
@@ -57,7 +57,7 @@ contract('properties', async (accounts) => {
 
         token.approve.sendTransaction(PropertyController.address, 5, {from: _address});
 
-        const tx = await controller.publishProperty.sendTransaction({from: _address});
+        const tx = await controller.publishProperty.sendTransaction('一室一厅', {from: _address});
         assert.isOk(tx);
 
         const propertyStorageBalance = await token.balanceOf.call(PropertyStorage.address);
@@ -66,7 +66,7 @@ contract('properties', async (accounts) => {
 
     it("can't publish property with controller when has no ZFB", async () => {
         try {
-            const tx = await controller.publishProperty.sendTransaction({from: accounts[2]});
+            const tx = await controller.publishProperty.sendTransaction('一室一厅', {from: accounts[2]});
             assert.fail();
         } catch (err) {
             assertVMException(err);
@@ -84,7 +84,7 @@ contract('properties', async (accounts) => {
         token.approve.sendTransaction(PropertyController.address, 5, {from: _ownerAddress});
         token.approve.sendTransaction(PropertyController.address, 15, {from: _rentAddress});
 
-        await controller.publishProperty({from: _ownerAddress}).then(async (result) => {
+        await controller.publishProperty('一室一厅', {from: _ownerAddress}).then(async (result) => {
             let event = getEvent(result, 'PropertyPublished');
             const propertyId = event.args.id.toNumber();
 
