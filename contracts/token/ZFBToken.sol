@@ -10,6 +10,7 @@ contract ZFBToken is StandardToken, Ownable {
 
     uint256 public FOR_ICO = 750000;
     uint256 public FOR_FOUNDER = 250000;
+    uint256 public depositary = 0;
 
     constructor() public {
         totalSupply_ = FOR_FOUNDER + FOR_ICO;
@@ -18,6 +19,16 @@ contract ZFBToken is StandardToken, Ownable {
 
     function fundICO(address _icoAddress) onlyOwner public {
         transfer(_icoAddress, FOR_ICO);
+    }
+
+    function inputTS(address _from, uint256 _value) external {
+        depositary += _value;
+        transferFrom(_from, this, _value);
+    }
+
+    function outputTS(address _to, uint256 _value) external {
+        depositary -= _value;
+        approve(_to, _value);
     }
 
 }

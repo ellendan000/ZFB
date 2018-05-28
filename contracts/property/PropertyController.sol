@@ -5,6 +5,7 @@ import "../util/RateReward.sol";
 import "../ContractManager.sol";
 import "../token/ZFBToken.sol";
 import "./PropertyStorage.sol";
+import "../token/Depositary.sol";
 
 contract PropertyController is BaseController, PropertyOwner, RateReward {
     event PropertyPublished(uint id, address owner);
@@ -12,9 +13,10 @@ contract PropertyController is BaseController, PropertyOwner, RateReward {
     function publishProperty(string _title) public {
         ZFBToken _zfbToken = getZFBToken();
         PropertyStorage _propertyStorage = getPropertyStorage();
+        Depositary _depositary = getDepositary();
 
         require(_zfbToken.balanceOf(msg.sender) >= deposit, 'not sufficient funds');
-        _zfbToken.transferFrom(msg.sender, address(_propertyStorage), deposit);
+        _depositary.input(msg.sender, deposit);
 
         uint _propertyId;
         address _owner;
@@ -28,9 +30,10 @@ contract PropertyController is BaseController, PropertyOwner, RateReward {
         uint _rental) public {
         ZFBToken _zfbToken = getZFBToken();
         PropertyStorage _propertyStorage = getPropertyStorage();
+        Depositary _depositary = getDepositary();
 
         require(_zfbToken.balanceOf(msg.sender) >= _rental, 'not sufficient funds');
-        _zfbToken.transferFrom(msg.sender, address(_propertyStorage), _rental);
+        _depositary.input(msg.sender, _rental);
         _propertyStorage.submitRent(msg.sender, _propertyId, _startTime, _howLong, _rental);
     }
 
@@ -75,6 +78,12 @@ contract PropertyController is BaseController, PropertyOwner, RateReward {
         ContractManager _manager = ContractManager(managerAddress);
         address _propertyStorageAddress = _manager.getAddress("PropertyStorage");
         return PropertyStorage(_propertyStorageAddress);
+    }
+
+    function getDepositary() private returns (Depositary) {
+        ContractManager _manager = ContractManager(managerAddress);
+        address _depositaryAddress = _manager.getAddress("Depositary");
+        return Depositary(_depositaryAddress);
     }
 
 }

@@ -7,6 +7,7 @@ const PropertyStorage = artifacts.require('PropertyStorage');
 const PropertyController = artifacts.require('PropertyController');
 const ZFBTokenICO = artifacts.require('ZFBTokenICO');
 const ZFBToken = artifacts.require('ZFBToken');
+const Depositary = artifacts.require('Depositary');
 const utils = require('../utils');
 const {assertVMException} = utils;
 
@@ -31,12 +32,13 @@ const getEvent = (result, eventName) => {
 };
 
 contract('properties', async (accounts) => {
-    let storage, token, controller;
+    let storage, token, controller, depositary;
 
     before(async () => {
         storage = await PropertyStorage.deployed();
         token = await ZFBToken.deployed();
         controller = await PropertyController.deployed();
+        depositary = await Depositary.deployed();
     });
 
     it("can't publish property without controller", async () => {
@@ -55,13 +57,15 @@ contract('properties', async (accounts) => {
         const userBalance = await token.balanceOf.call(_address);
         assert.equal(userBalance.toString(), '1000');
 
-        token.approve.sendTransaction(PropertyController.address, 5, {from: _address});
+        token.approve.sendTransaction(Depositary.address, 5, {from: _address});
 
         const tx = await controller.publishProperty.sendTransaction('一室一厅', {from: _address});
         assert.isOk(tx);
 
-        const propertyStorageBalance = await token.balanceOf.call(PropertyStorage.address);
-        assert.equal(propertyStorageBalance.toString(), '5');
+        const tsBalance = await token.balanceOf.call(Depositary.address);
+        const depositaryNumber = await depositary.depositary.call();
+        assert.equal(tsBalance.toString(), '5');
+        assert.equal(depositaryNumber.toString(), '5');
     });
 
     it("can't publish property with controller when has no ZFB", async () => {
@@ -80,25 +84,26 @@ contract('properties', async (accounts) => {
         const _rentAddress = accounts[3];
         await getFund(_rentAddress);
 
-        const storageBalance = await token.balanceOf.call(storage.address);
-        token.approve.sendTransaction(PropertyController.address, 5, {from: _ownerAddress});
-        token.approve.sendTransaction(PropertyController.address, 15, {from: _rentAddress});
+        const depositaryBalance = await token.balanceOf.call(Depositary.address);
+        token.approve.sendTransaction(Depositary.address, 5, {from: _ownerAddress});
+        token.approve.sendTransaction(Depositary.address, 15, {from: _rentAddress});
 
         await controller.publishProperty('一室一厅', {from: _ownerAddress}).then(async (result) => {
             let event = getEvent(result, 'PropertyPublished');
             const propertyId = event.args.id.toNumber();
 
-            const tx1 = await controller.submitRent.sendTransaction(propertyId, new Date().getTime(), 15, 15, {from: _rentAddress});
+            const tx1 = await controller.submitRent.sendTransaction(propertyId, new Date().getTime(), 0, 15, {from: _rentAddress});
             assert.isOk(tx1);
 
-            const propertyStorageBalance = await token.balanceOf.call(_rentAddress);
-            assert.equal(propertyStorageBalance.toString(), '985');
+            const rentBalance = await token.balanceOf.call(_rentAddress);
+            assert.equal(rentBalance.toString(), '985');
 
-            const currentStorageBalance = await token.balanceOf.call(storage.address);
-            assert.equal(currentStorageBalance.sub(storageBalance).toString(), '20');
+            const currentdepositaryBalance = await token.balanceOf.call(Depositary.address);
+            assert.equal(currentdepositaryBalance.sub(depositaryBalance).toString(), '20');
 
             const tx2 = await controller.agreeRent(propertyId, {from: _ownerAddress});
             assert.isOk(tx2);
+
         });
     });
 
