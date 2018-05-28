@@ -34,9 +34,9 @@ contract PropertyStorage is BaseStorage {
 
     uint latestPropertyId = 0;
 
-    function publishProperty(address _owner, string title, uint _deposit) public onlyController returns (uint, address){
+    function publishProperty(address _owner, string _title, uint _deposit) public onlyController returns (uint, address){
         latestPropertyId = latestPropertyId.add(1);
-        idToProperty[latestPropertyId] = Property(latestPropertyId, _deposit, title, _owner, State.Idle);
+        idToProperty[latestPropertyId] = Property(latestPropertyId, _deposit, _title, _owner, State.Idle);
         return (latestPropertyId, _owner);
     }
 
@@ -113,6 +113,23 @@ contract PropertyStorage is BaseStorage {
 //        rent.tenantRate == _rate;
 //        return _rate;
 //    }
+
+    function getLatestRent(uint _propertyId) public view returns (address, uint, uint, uint, uint, uint, uint8, uint8){
+        require(propertyIdToRents[_propertyId].length > 1);
+        Rent memory latestRent = propertyIdToRents[_propertyId][propertyIdToRents[_propertyId].length - 1];
+        return (latestRent.tenant,
+        latestRent.startTime,
+        latestRent.howLong,
+        latestRent.rental,
+        latestRent.lastWithdrawTime,
+        latestRent.withdrawTotal,
+        latestRent.ownerRate,
+        latestRent.tenantRate);
+    }
+
+    function getRentsLength(uint _propertyId) public view returns (uint) {
+        return propertyIdToRents[_propertyId].length;
+    }
 
     modifier onlyPropertyOwner(address _owner, uint _propertyId) {
         require(idToProperty[_propertyId].owner == _owner);

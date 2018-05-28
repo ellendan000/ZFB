@@ -9,7 +9,7 @@ import "./PropertyStorage.sol";
 contract PropertyController is BaseController, PropertyOwner, RateReward {
     event PropertyPublished(uint id, address owner);
 
-    function publishProperty(string title) public {
+    function publishProperty(string _title) public {
         ZFBToken _zfbToken = getZFBToken();
         PropertyStorage _propertyStorage = getPropertyStorage();
 
@@ -18,7 +18,7 @@ contract PropertyController is BaseController, PropertyOwner, RateReward {
 
         uint _propertyId;
         address _owner;
-        (_propertyId, _owner) = _propertyStorage.publishProperty(msg.sender, title, deposit);
+        (_propertyId, _owner) = _propertyStorage.publishProperty(msg.sender, _title, deposit);
         emit PropertyPublished(_propertyId, _owner);
     }
 

@@ -29,6 +29,21 @@ contract TestPropertyStorage {
 
         Assert.equal(propertyStorage.submitRent(this, _givenPropertyId, _givenStartTime, _givenHowLong, _rental),
             0, 'Should rent property with rent serial 0');
+
+        address tenant;
+         (tenant,,,,,,,) = propertyStorage.propertyIdToRents(_givenPropertyId, 0);
+        Assert.equal(tenant, this, 'should put rent in rents');
     }
 
+    function testLatestRent() public {
+        uint _givenPropertyId = 1;
+        uint _givenStartTime = now;
+        uint _givenHowLong = 15;
+        uint _rental = 15;
+        propertyStorage.submitRent(this, _givenPropertyId, _givenStartTime, _givenHowLong, _rental);
+
+        address tenant;
+        (tenant,,,,,,,) = propertyStorage.getLatestRent(_givenPropertyId);
+        Assert.equal(tenant, this, 'should get latest rent');
+    }
 }
