@@ -43,7 +43,23 @@ contract TestPropertyStorage {
         propertyStorage.submitRent(this, _givenPropertyId, _givenStartTime, _givenHowLong, _rental);
 
         address tenant;
-        (tenant,,,,,,,) = propertyStorage.getLatestRent(_givenPropertyId);
+        uint startTime;
+        (tenant, startTime,,,,,,) = propertyStorage.getLatestRent(_givenPropertyId);
         Assert.equal(tenant, this, 'should get latest rent');
+        Assert.isTrue(now >= startTime, 'should get the start time of latest rent');
     }
+
+    function testCalculateRental() public {
+        address _tenantAddress = 0x00;
+        uint _givenStartTime = now;
+        uint _givenHowLong = 0;
+        uint _rental = 15;
+
+        uint _propertyId;
+        (_propertyId, ) = propertyStorage.publishProperty(this, '一室一厅', 5);
+        propertyStorage.submitRent(_tenantAddress, _propertyId, _givenStartTime, _givenHowLong, _rental);
+        propertyStorage.agreeRent(this, _propertyId);
+        Assert.equal(propertyStorage.calculateRental(this, _propertyId), 15, 'should return ZFB number is 15');
+    }
+
 }

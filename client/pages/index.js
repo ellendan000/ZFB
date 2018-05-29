@@ -1,11 +1,17 @@
 import {getTokenInfo, exchangeForToken} from "../web3/tokens";
-import {publishProperty, getProperty, submitRent, getRents} from "../web3/properties";
+import {publishProperty, getProperty, submitRent, getRents, agreeRent, getRental} from "../web3/properties";
 
 export default class IndexPage extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            propertyId: 1
+        }
+    }
 
     showToken = async () => {
         const tokenAmount = await getTokenInfo();
-        console.log(tokenAmount);
+        console.log("ZFB amount: ", tokenAmount);
     };
 
     exchangeToken = async () => {
@@ -14,54 +20,81 @@ export default class IndexPage extends React.Component {
     };
 
     publishProperty = async () => {
-        const propertyId = await publishProperty('一室一厅');
-        console.log(propertyId);
+        const id = await publishProperty('一室一厅');
+        this.setState({propertyId: id});
+        console.log(id);
     };
 
     getProperty = async () => {
-        const displayInfo = await getProperty(1);
+        console.log(this.state.propertyId);
+        const displayInfo = await getProperty(this.state.propertyId);
         console.log(displayInfo);
     };
 
     getRents = async () => {
-        const displayInfo = await getRents(1);
+        const displayInfo = await getRents(this.state.propertyId);
         console.log(displayInfo);
     };
 
     submitRent = async () => {
-        await submitRent(1, new Date().getTime(), 2, 2);
+        await submitRent(this.state.propertyId, new Date().getTime() / 1000, 1, 4);
+        console.log('Completed');
+    };
+
+    agreeRent = async () => {
+        await agreeRent(this.state.propertyId);
+        console.log('Completed');
+    };
+
+    getRental = async () => {
+        await getRental(this.state.propertyId);
+        console.log('Completed');
     };
 
     render() {
         return (
             <div>
                 <div>
+                    <div>ZFB</div>
                     <button onClick={this.showToken}>
-                        Get the number of Token
+                        读取当前账户ZFB数量
                     </button>
 
                     <button onClick={this.exchangeToken}>
-                        exchange token by 1 ether
-                    </button>
-
-                    <button onClick={this.publishProperty}>
-                        publish property
+                        转1以太币换去ZFB
                     </button>
                 </div>
 
                 <div>
+                    <div>房主</div>
+                    <button onClick={this.publishProperty}>
+                        发布房源
+                    </button>
+
+                    <button onClick={this.agreeRent}>
+                        确定出租
+                    </button>
+
+                    <button onClick={this.getRental}>
+                        取得租金
+                    </button>
+                </div>
+
+                <div>
+                    <div>租客</div>
+                    <button onClick={this.submitRent}>
+                        发起租赁交易
+                    </button>
+                </div>
+
+                <div>
+                    <div>查询房屋租赁信息</div>
                     <button onClick={this.getProperty}>
-                        get property id 1
+                        显示房屋信息
                     </button>
 
                     <button onClick={this.getRents}>
-                        get rents by id 1
-                    </button>
-                </div>
-
-                <div>
-                    <button onClick={this.submitRent}>
-                        submit rent for property id 1
+                        显示房屋的租赁信息
                     </button>
                 </div>
             </div>

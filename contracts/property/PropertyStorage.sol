@@ -62,25 +62,29 @@ contract PropertyStorage is BaseStorage {
     }
 
     function calculateRental(address _owner, uint _propertyId) public
-    onlyController onlyPropertyOwner(_owner, _propertyId)
+    onlyPropertyOwner(_owner, _propertyId)
     returns (uint) {
-        require(idToProperty[_propertyId].owner == _owner);
         require(idToProperty[_propertyId].state == State.Renting);
 
         Rent[] memory rents = propertyIdToRents[_propertyId];
         Rent storage currentRent = propertyIdToRents[_propertyId][rents.length - 1];
-        require(now > currentRent.startTime);
+        uint currentTime = now;
+        require(currentTime >= currentRent.startTime);
 
         uint result;
-        if (now >= currentRent.startTime.add(currentRent.howLong * 1000 * 60)) {
+        if (currentTime >= currentRent.startTime.add(currentRent.howLong * 60)) {
             idToProperty[_propertyId].state = State.Idle;
             result = currentRent.rental - currentRent.withdrawTotal;
             currentRent.withdrawTotal = currentRent.rental;
+            currentRent.lastWithdrawTime = currentTime;
             return result;
         }
 
-        result = now.sub(currentRent.lastWithdrawTime).div(1000 * 60);
+        result = currentTime.sub(currentRent.lastWithdrawTime).div(60);
+        result = result.mul(currentRent.rental.div(currentRent.howLong));
+
         currentRent.withdrawTotal = currentRent.withdrawTotal.add(result);
+        currentRent.lastWithdrawTime = currentTime;
         return result;
     }
 

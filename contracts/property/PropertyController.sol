@@ -9,6 +9,7 @@ import "../token/Depositary.sol";
 
 contract PropertyController is BaseController, PropertyOwner, RateReward {
     event PropertyPublished(uint id, address owner);
+    event WithdrawRental(uint amount);
 
     function publishProperty(string _title) public {
         ZFBToken _zfbToken = getZFBToken();
@@ -43,13 +44,12 @@ contract PropertyController is BaseController, PropertyOwner, RateReward {
     }
 
     function getRental(uint _propertyId) public {
-        ZFBToken _zfbToken = getZFBToken();
         PropertyStorage _propertyStorage = getPropertyStorage();
+        Depositary _depositary = getDepositary();
 
-        _zfbToken.approve(
-            msg.sender,
-            _propertyStorage.calculateRental(msg.sender, _propertyId)
-        );
+        uint withdrawAmount = _propertyStorage.calculateRental(msg.sender, _propertyId);
+        _depositary.output(msg.sender, withdrawAmount);
+        emit WithdrawRental(withdrawAmount);
     }
 
 //    function ownerRate(uint _propertyId, uint8 _rate) public {
