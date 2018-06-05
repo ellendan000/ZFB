@@ -93,5 +93,5 @@ export const getRental = async (propertyId) => {
             return event.args.amount.toNumber();
         });
     console.log('approve withdraw amount:', withdrawAmount);
-    token.transferFrom(depositary.address, addresses[0], withdrawAmount, {from: addresses[0]});
+    await token.transferFrom(depositary.address, addresses[0], withdrawAmount, {from: addresses[0], gas: 50000});
 };

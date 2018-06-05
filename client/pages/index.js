@@ -37,7 +37,7 @@ export default class IndexPage extends React.Component {
     };
 
     submitRent = async () => {
-        await submitRent(this.state.propertyId, new Date().getTime() / 1000, 1, 4);
+        await submitRent(this.state.propertyId, new Date().getTime() / 1000, 1, 15);
         console.log('Completed');
     };
 
